@@ -81,6 +81,27 @@ export default function App(){
    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(()=>{});
  },[]);
  useEffect(() => {
+  const interval = setInterval(() => {
+    const now = new Date();
+    const currentHM = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const isSecondsZero = now.getSeconds() === 0;
+
+    if (isSecondsZero && Array.isArray(reminders)) {
+      reminders.forEach((item) => {
+        if (item.time === currentHM && item.enabled) {
+          if (Notification.permission === 'granted') {
+            new Notification('ได้เวลาอ่านหนังสือแล้ว!', {
+              body: item.title || 'ถึงเวลาตามตารางที่คุณตั้งไว้แล้วนะ',
+            });
+          }
+        }
+      });
+    }
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [reminders]);
+ useEffect(() => {
   if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission().then((permission) => {
       if (permission === "granted") {
