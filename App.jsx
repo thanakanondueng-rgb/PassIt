@@ -219,7 +219,7 @@ export default function App(){
    {page==="settings"&&<SettingsPage examDate={examDate} setExamDate={setExamDate} examTime={examTime} setExamTime={setExamTime} emergency={emergency} setEmergency={setEmergency} exportData={exportData} reminders={reminders} setReminders={setReminders} notifyReady={notifyReady} enableNotifications={enableNotifications}/>}
    <footer>© 2026 PassIt! — Smart Study Planner</footer>
   </main>
-  function AIBox({subjects,tasks}){
+ function AIBox({subjects,tasks}){
  const [q,setQ]=useState("");
  const [ans,setAns]=useState("");
  const [loading,setLoading]=useState(false);
@@ -252,6 +252,7 @@ export default function App(){
 
  return <div className="card ai-box"><Sparkles size={45}/><h2>ถาม PassIt! AI</h2><p>ผู้ช่วยวิเคราะห์จากวิชา Priority, งานค้าง และเวลาที่คุณมี</p><div className="quick"><button onClick={()=>ask("วันนี้มีเวลาอ่านแค่ 1 ชั่วโมง")}>มีเวลา 1 ชั่วโมง</button><button onClick={()=>ask("ช่วยจัดแผนเร่งด่วน")}>ใกล้สอบมาก</button><button onClick={()=>ask("ควรอ่านฟิสิกส์อะไร")}>ฟิสิกส์</button></div><div className="input"><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&ask()} placeholder="พิมพ์คำถาม..."/><button onClick={()=>ask()} disabled={loading}>{loading ? "กำลังถาม..." : "ถาม"}</button></div>{ans&&<div className="answer"><b>✨ PassIt! AI</b><p>{ans}</p></div>}</div>
 }
+ 
   {ai&&<AIModal subjects={subjects} tasks={tasks} close={()=>setAi(false)}/>}
   {pomodoro&&<div className="modal-bg"><div className="modal"><button className="x" onClick={()=>setPomodoro(false)}><X/></button><Pomodoro addSession={addSession} subjects={subjects}/></div></div>}
  </div>
