@@ -252,39 +252,6 @@ export default function App(){
 
  return <div className="card ai-box"><Sparkles size={45}/><h2>ถาม PassIt! AI</h2><p>ผู้ช่วยวิเคราะห์จากวิชา Priority, งานค้าง และเวลาที่คุณมี</p><div className="quick"><button onClick={()=>ask("วันนี้มีเวลาอ่านแค่ 1 ชั่วโมง")}>มีเวลา 1 ชั่วโมง</button><button onClick={()=>ask("ช่วยจัดแผนเร่งด่วน")}>ใกล้สอบมาก</button><button onClick={()=>ask("ควรอ่านฟิสิกส์อะไร")}>ฟิสิกส์</button></div><div className="input"><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&ask()} placeholder="พิมพ์คำถาม..."/><button onClick={()=>ask()} disabled={loading}>{loading ? "กำลังถาม..." : "ถาม"}</button></div>{ans&&<div className="answer"><b>✨ PassIt! AI</b><p>{ans}</p></div>}</div>
 }
- function AIBox({subjects,tasks}){
- const [q,setQ]=useState("");
- const [ans,setAns]=useState("");
- const [loading,setLoading]=useState(false);
-
- const ask = async (text = q) => {
-  const query = text.trim(); 
-  if(!query) return;
-
-  setLoading(true);
-  setAns("กำลังคิดคำตอบ...");
-
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: query }] }]
-      })
-    });
-    const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "ไม่สามารถดึงคำตอบได้";
-    setAns(reply);
-  } catch (error) {
-    console.error("AI Error:", error);
-    setAns("เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI");
-  } finally {
-    setLoading(false);
-  }
- };
-
- return <div className="card ai-box"><Sparkles size={45}/><h2>ถาม PassIt! AI</h2><p>ผู้ช่วยวิเคราะห์จากวิชา Priority, งานค้าง และเวลาที่คุณมี</p><div className="quick"><button onClick={()=>ask("วันนี้มีเวลาอ่านแค่ 1 ชั่วโมง")}>มีเวลา 1 ชั่วโมง</button><button onClick={()=>ask("ช่วยจัดแผนเร่งด่วน")}>ใกล้สอบมาก</button><button onClick={()=>ask("ควรอ่านฟิสิกส์อะไร")}>ฟิสิกส์</button></div><div className="input"><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&ask()} placeholder="พิมพ์คำถาม..."/><button onClick={()=>ask()} disabled={loading}>{loading ? "กำลังถาม..." : "ถาม"}</button></div>{ans&&<div className="answer"><b>✨ PassIt! AI</b><p>{ans}</p></div>}</div>
-}
  
   {ai&&<AIModal subjects={subjects} tasks={tasks} close={()=>setAi(false)}/>}
   {pomodoro&&<div className="modal-bg"><div className="modal"><button className="x" onClick={()=>setPomodoro(false)}><X/></button><Pomodoro addSession={addSession} subjects={subjects}/></div></div>}
