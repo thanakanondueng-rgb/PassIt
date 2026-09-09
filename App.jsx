@@ -78,7 +78,7 @@ export default function App(){
 
  useEffect(()=>{
    if(!("serviceWorker" in navigator)) return;
-   navigator.serviceWorker.register("./sw.js").catch(()=>{});
+   navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(()=>{});
  },[]);
 
  const enableNotifications=async()=>{
@@ -94,22 +94,27 @@ export default function App(){
  };
 
  useEffect(()=>{
-   const tick=()=>{
+   const tick=async()=>{
      const now=new Date();
-     const hm=now.toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit",hour12:false});
-     const dateKey=now.toISOString().slice(0,10);
-     reminders.forEach(r=>{
-       if(r.enabled && r.time===hm && r.lastFired!==dateKey){
-         if("Notification" in window && Notification.permission==="granted"){
-           new Notification("PassIt! 📚",{body:`${r.label} (${r.time})`,tag:`passit-${r.id}-${dateKey}`});
+     const hm=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+     const dateKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+     for(const r of reminders){
+       if(!r.enabled || r.time!==hm || r.lastFired===dateKey || !notifyReady) continue;
+       try{
+         if("serviceWorker" in navigator){
+           const reg=await navigator.serviceWorker.ready;
+           await reg.showNotification("PassIt! 📚",{body:`${r.label} (${r.time})`,tag:`passit-${r.id}-${dateKey}`,icon:`${import.meta.env.BASE_URL}icon-192.png`});
+         }else{
+           new Notification("PassIt! 📚",{body:`${r.label} (${r.time})`});
          }
-         setReminders(rs=>rs.map(x=>x.id===r.id?{...x,lastFired:dateKey}:x));
-       }
-     });
+       }catch(e){ console.warn("Notification failed",e); }
+       setReminders(rs=>rs.map(x=>x.id===r.id?{...x,lastFired:dateKey}:x));
+     }
    };
    const id=setInterval(tick,1000);
+   tick();
    return()=>clearInterval(id);
- },[reminders]);
+ },[reminders,notifyReady]);
 
  const score=readiness(subjects,tasks,examDate);
  const completed=tasks.filter(t=>t.done).length;

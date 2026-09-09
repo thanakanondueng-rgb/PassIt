@@ -41,3 +41,9 @@ AI ในเวอร์ชันนี้เป็น Rule-based Assistant เ�
 หากต้องการ AI LLM จริง ให้ต่อ backend/serverless function และเก็บ API key ใน Environment Variables
 
 \n## หมายเหตุเรื่องการแจ้งเตือน\nระบบแจ้งเตือนใช้ Browser Notification และทำงานขณะหน้า PassIt! เปิดอยู่/เบื้องหลังในเบราว์เซอร์เดียวกัน หากต้องการแจ้งเตือนแม้ปิดเว็บหรือปิดเบราว์เซอร์ ต้องเพิ่ม Web Push backend (VAPID) ในอนาคต\n
+
+## แจ้งเตือน
+เว็บจะขอสิทธิ์ Notification และตรวจสอบเวลาที่ตั้งไว้ทุกวินาทีขณะที่หน้าเว็บยังทำงานอยู่หรืออยู่เบื้องหลังในแท็บเดียวกัน หากปิดเบราว์เซอร์ทั้งหมด GitHub Pages ไม่สามารถปลุก Service Worker ตามเวลาที่กำหนดได้เอง ต้องใช้ Web Push + backend สำหรับการแจ้งเตือนแบบแม้ปิดเว็บ
+
+## AI
+AI Study Assistant ในรุ่นนี้เป็น Smart Rule-based Assistant ไม่ใช่ LLM จริง หากต้องการ AI จริง ให้สร้าง backend/serverless endpoint แล้วเก็บ API key ไว้ใน Environment Variables ห้ามฝัง API key ใน React frontend
