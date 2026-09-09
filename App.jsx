@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useState} from "react";
+ import React,{useEffect,useMemo,useState} from "react";
 import {
  Home,CalendarDays,ListChecks,BookOpen,RotateCcw,BarChart3,Sparkles,Clock3,
  Target,Trophy,Settings,Menu,X,Bell,Check,Plus,Trash2,Pencil,Flame,Gauge,
@@ -80,57 +80,16 @@ export default function App(){
    if(!("serviceWorker" in navigator)) return;
    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(()=>{});
  },[]);
- useEffect(() => {
-  const interval = setInterval(() => {
-    const now = new Date();
-    const currentHM = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const isSecondsZero = now.getSeconds() === 0;
 
-    if (isSecondsZero && Array.isArray(reminders)) {
-      reminders.forEach((item) => {
-        if (item.time === currentHM && item.enabled) {
-          if (Notification.permission === 'granted') {
-            new Notification('ได้เวลาอ่านหนังสือแล้ว!', {
-              body: item.title || 'ถึงเวลาตามตารางที่คุณตั้งไว้แล้วนะ',
-            });
-          }
-        }
-      });
-    }
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [reminders]);
  useEffect(() => {
   if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission().then((permission) => {
       if (permission === "granted") {
         setNotifyReady(true);
-       useEffect(() => {
-  const interval = setInterval(() => {
-    const now = new Date();
-    const currentHM = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const isSecondsZero = now.getSeconds() === 0;
-
-    if (isSecondsZero && Array.isArray(reminders)) {
-      reminders.forEach((item) => {
-        if (item.time === currentHM && item.enabled) {
-          if (Notification.permission === 'granted') {
-            new Notification('ได้เวลาอ่านหนังสือแล้ว!', {
-              body: item.title || 'ถึงเวลาตามตารางที่คุณตั้งไว้แล้วนะ',
-            });
-          }
-        }
-      });
-    }
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [reminders]);
       }
     });
   }
-}, []);
+ }, []);
 
  const enableNotifications=async()=>{
    if(!("Notification" in window)){
@@ -219,40 +178,6 @@ export default function App(){
    {page==="settings"&&<SettingsPage examDate={examDate} setExamDate={setExamDate} examTime={examTime} setExamTime={setExamTime} emergency={emergency} setEmergency={setEmergency} exportData={exportData} reminders={reminders} setReminders={setReminders} notifyReady={notifyReady} enableNotifications={enableNotifications}/>}
    <footer>© 2026 PassIt! — Smart Study Planner</footer>
   </main>
-  function AIBox({subjects,tasks}){
- const [q,setQ]=useState("");
- const [ans,setAns]=useState("");
- const [loading,setLoading]=useState(false);
-
- const ask = async (text = q) => {
-  const query = text.trim(); 
-  if(!query) return;
-
-  setLoading(true);
-  setAns("กำลังคิดคำตอบ...");
-
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: query }] }]
-      })
-    });
-    const data = await response.json();
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "ไม่สามารถดึงคำตอบได้";
-    setAns(reply);
-  } catch (error) {
-    console.error("AI Error:", error);
-    setAns("เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI");
-  } finally {
-    setLoading(false);
-  }
- };
-
- return <div className="card ai-box"><Sparkles size={45}/><h2>ถาม PassIt! AI</h2><p>ผู้ช่วยวิเคราะห์จากวิชา Priority, งานค้าง และเวลาที่คุณมี</p><div className="quick"><button onClick={()=>ask("วันนี้มีเวลาอ่านแค่ 1 ชั่วโมง")}>มีเวลา 1 ชั่วโมง</button><button onClick={()=>ask("ช่วยจัดแผนเร่งด่วน")}>ใกล้สอบมาก</button><button onClick={()=>ask("ควรอ่านฟิสิกส์อะไร")}>ฟิสิกส์</button></div><div className="input"><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&ask()} placeholder="พิมพ์คำถาม..."/><button onClick={()=>ask()} disabled={loading}>{loading ? "กำลังถาม..." : "ถาม"}</button></div>{ans&&<div className="answer"><b>✨ PassIt! AI</b><p>{ans}</p></div>}</div>
-}
- 
   {ai&&<AIModal subjects={subjects} tasks={tasks} close={()=>setAi(false)}/>}
   {pomodoro&&<div className="modal-bg"><div className="modal"><button className="x" onClick={()=>setPomodoro(false)}><X/></button><Pomodoro addSession={addSession} subjects={subjects}/></div></div>}
  </div>
@@ -307,31 +232,51 @@ function SubjectsPage({subjects,addSubject,deleteSubject}){
 function ReviewPage({subjects,addSession}){return <Page title="ทบทวน (Review)" sub="ทบทวนหัวข้อที่อ่านแล้วด้วย Active Recall"><div className="card review"><Brain size={45}/><h2>รอบทบทวนวันนี้</h2><p>เลือกวิชาที่ต้องการทบทวน แล้วบันทึกเวลาได้ทันที</p>{subjects.map(s=><div className="review-row"><span>{s.icon}</span><div><b>{s.name}</b><small>ทบทวนบทล่าสุด · 10 นาที</small></div><button className="purple" onClick={()=>addSession(s.id,10,2)}>เริ่มทบทวน</button></div>)}</div></Page>}
 function StatsPage({subjects,history,score,totalMinutes,totalPages}){return <Page title="สถิติ & ความคืบหน้า" sub="ข้อมูลจาก Study History ของคุณ"><div className="metrics"><Metric icon={<Gauge/>} label="Exam Readiness" value={score+"%"}/><Metric icon={<Clock3/>} label="เวลาอ่านสะสม" value={(totalMinutes/60).toFixed(1)+" ชม."}/><Metric icon={<BookOpen/>} label="จำนวนหน้า" value={totalPages+" หน้า"}/><Metric icon={<Flame/>} label="Streak" value="7 วัน"/></div><div className="card"><Title text="Study History"/>{history.map(h=><div className="history"><b>{h.date}</b><span>{subjects.find(s=>s.id===h.subjectId)?.name||"ลบวิชาแล้ว"}</span><span>{h.minutes} นาที</span><span>{h.pages} หน้า</span></div>)}</div></Page>}
 function AIPage({subjects,tasks}){return <Page title="AI Study Assistant" sub="ผู้ช่วยจัดลำดับการอ่านจากเวลาที่คุณมี"><AIBox subjects={subjects} tasks={tasks}/></Page>}
+
 function AIBox({subjects,tasks}){
- const [q,setQ]=useState(""),[ans,setAns]=useState("");
- const ask=(text=q)=>{
-  const query=text.trim(); if(!query){setAns("ลองพิมพ์คำถาม เช่น “มีเวลา 1 ชั่วโมง ควรอ่านอะไรก่อน?”");return;}
-  const urgent=subjects.filter(s=>s.priority==="สูง").sort((a,b)=>a.progress-b.progress),pending=tasks.filter(t=>!t.done);
-  const hardest=urgent[0]||subjects[0],task=pending.find(t=>t.subjectId===hardest?.id)||pending[0],lower=query.toLowerCase();
-  if(/1\s*ชั่วโมง|60\s*นาที|หนึ่งชั่วโมง/.test(query)) setAns(`แผน 60 นาที: 35 นาที → ${hardest?.name||"วิชาสำคัญ"}${task?` (${task.title})`:""}, 15 นาที → ทบทวนจุดที่ผิด, 10 นาที → ทำโจทย์และสรุป`);
-  else if(/ฟิสิกส์/.test(query)){const t=tasks.find(x=>x.subjectId==="phy"&&!x.done);setAns(`แนะนำฟิสิกส์: ${t?.title||"ทบทวนบทที่ยังไม่ครบ"} ก่อน เพราะเป็นวิชา Priority สูง และควรแบ่งอ่านเป็นช่วง 25 นาที + พัก 5 นาที`);}
-  else if(/เคมี/.test(query)){const t=tasks.find(x=>x.subjectId==="chem"&&!x.done);setAns(`แนะนำเคมี: ${t?.title||"ทบทวนพันธะและโจทย์"} แล้วปิดท้ายด้วยโจทย์ 5–10 ข้อ`);}
-  else if(/เร่ง|ฉุกเฉิน|ใกล้สอบ/.test(query)) setAns("เปิด Emergency Mode แล้วจัดเวลาให้ Priority สูงก่อน จากนั้นเก็บงานที่ใกล้สอบที่สุด และตัดกิจกรรมที่ไม่จำเป็นออก");
-  else if(/แผน|อ่านอะไร|ควรอ่าน/.test(lower)) setAns(`ตอนนี้ควรเริ่มจาก ${hardest?.name||"วิชาที่สำคัญที่สุด"}${task?` — ${task.title}`:""} แล้วใช้ Pomodoro 25 นาที จากนั้นพัก 5 นาทีและทบทวนสิ่งที่อ่าน`);
-  else setAns(`จากข้อมูลใน PassIt! แนะนำให้เริ่มจาก ${hardest?.name||"วิชาที่ Priority สูง"} และทำ "${task?.title||"งานที่ยังไม่เสร็จ"}" ก่อน แล้วค่อยไปวิชาอื่น`);
+ const [q,setQ]=useState("");
+ const [ans,setAns]=useState("");
+ const [loading,setLoading]=useState(false);
+
+ const ask = async (text = q) => {
+  const query = text.trim(); 
+  if(!query) return;
+
+  setLoading(true);
+  setAns("กำลังคิดคำตอบ...");
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: query }] }]
+      })
+    });
+    const data = await response.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "ไม่สามารถดึงคำตอบได้";
+    setAns(reply);
+  } catch (error) {
+    console.error("AI Error:", error);
+    setAns("เกิดข้อผิดพลาดในการเชื่อมต่อกับ AI");
+  } finally {
+    setLoading(false);
+  }
  };
- return <div className="card ai-box"><Sparkles size={45}/><h2>ถาม PassIt! AI</h2><p>ผู้ช่วยวิเคราะห์จากวิชา Priority, งานค้าง และเวลาที่คุณมี</p><div className="quick"><button onClick={()=>ask("วันนี้มีเวลาอ่านแค่ 1 ชั่วโมง")}>มีเวลา 1 ชั่วโมง</button><button onClick={()=>ask("ช่วยจัดแผนเร่งด่วน")}>ใกล้สอบมาก</button><button onClick={()=>ask("ควรอ่านฟิสิกส์อะไร")}>ฟิสิกส์</button></div><div className="input"><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&ask()} placeholder="พิมพ์คำถาม..."/><button onClick={()=>ask()}>ถาม</button></div>{ans&&<div className="answer"><b>✨ PassIt! AI</b><p>{ans}</p></div>}</div>
+
+ return <div className="card ai-box"><Sparkles size={45}/><h2>ถาม PassIt! AI</h2><p>ผู้ช่วยวิเคราะห์จากวิชา Priority, งานค้าง และเวลาที่คุณมี</p><div className="quick"><button onClick={()=>ask("วันนี้มีเวลาอ่านแค่ 1 ชั่วโมง")}>มีเวลา 1 ชั่วโมง</button><button onClick={()=>ask("ช่วยจัดแผนเร่งด่วน")}>ใกล้สอบมาก</button><button onClick={()=>ask("ควรอ่านฟิสิกส์อะไร")}>ฟิสิกส์</button></div><div className="input"><input value={q} onChange={e=>setQ(e.target.value)} onKeyDown={e=>e.key==="Enter"&&ask()} placeholder="พิมพ์คำถาม..."/><button onClick={()=>ask()} disabled={loading}>{loading ? "กำลังถาม..." : "ถาม"}</button></div>{ans&&<div className="answer"><b>✨ PassIt! AI</b><p>{ans}</p></div>}</div>
 }
+
 function Pomodoro({addSession,subjects}){
  const [sec,setSec]=useState(1500),[run,setRun]=useState(false),[subject,setSubject]=useState(subjects[0]?.id||"");
  useEffect(()=>{if(!run)return;const t=setInterval(()=>setSec(x=>{if(x<=1){setRun(false);return 1500}return x-1}),1000);return()=>clearInterval(t)},[run]);
  return <div className="card pomo"><Clock3 size={30}/><h2>Pomodoro Focus</h2><div className="circle">{String(Math.floor(sec/60)).padStart(2,"0")}:{String(sec%60).padStart(2,"0")}</div><select value={subject} onChange={e=>setSubject(e.target.value)}>{subjects.map(s=><option value={s.id}>{s.name}</option>)}</select><div className="actions"><button className="purple" onClick={()=>setRun(!run)}>{run?<Pause/>:<Play/>}{run?"หยุด":"เริ่มอ่าน"}</button><button className="outline" onClick={()=>{setRun(false);setSec(1500)}}>รีเซ็ต</button><button className="outline" onClick={()=>addSession(subject,25,5)}>บันทึก 25 นาที</button></div></div>
 }
 function GoalsPage({subjects,score}){return <Page title="เป้าหมาย & รางวัล" sub="เป้าหมายช่วยให้การอ่านมีทิศทาง"><div className="card goal"><Trophy size={45}/><h2>เป้าหมาย Exam Readiness 90%</h2><div className="track"><i style={{width:score+"%"}}/></div><b>{score}% / 90%</b><p>อีก {Math.max(0,90-score)}% เพื่อถึงเป้าหมาย</p></div></Page>}
-function Achievements({subjects,history,tasks}){const pages=history.reduce((a,x)=>a+x.pages,0),done=tasks.filter(x=>x.done).length;const a=[["🌱","เริ่มต้นเส้นทาง","บันทึกการอ่านครั้งแรก",history.length>0],["🔥","อ่านต่อเนื่อง 7 วัน","รักษา Streak 7 วัน",true],["📚","100 หน้า","อ่านครบ 100 หน้า",pages>=100],["🎯","ครบ 1 วิชา","ทำเนื้อหาครบ 100%",subjects.some(s=>s.progress>=100)],["☑","ภารกิจสำเร็จ","ทำงานวันนี้ครบ",done===tasks.length]];return <Page title="ความสำเร็จ" sub="ปลดล็อก Achievement จากพฤติกรรมการเรียน"><div className="cards achievements">{a.map(x=><div className={"card achievement "+(x[3]?"unlocked":"")}><div>{x[0]}</div><h3>{x[1]}</h3><p>{x[2]}</p><span>{x[3]?"✓ ปลดล็อกแล้ว":"🔒 ยังไม่ปลดล็อก"}</span></div>)}</div></Page>}
+function Achievements({subjects,history,tasks}){const pages=history.reduce((a,x)=>a+x.pages,0),done=tasks.filter(x=>x.done).length;const a=[["🌱","เริ่มต้นเส้นทาง","บันทึกการอ่านครั้งแรก",history.length>0],["🔥","อ่านต่อเนื่อง 7 วัน","รักษา Streak 7 วัน",true],["📚","100 หน้า","อ่านครบ 100 หน้า",pages>=100],["🎯","ครบ 1 วิชา","ทำเนื้อหาครบ 100%",subjects.some(s=>s.progress>=100)],["☑","ภารกิจสำเร็จ","ทำงานวันนี้ครบ",done===tasks.length]];return <Page title="ความสำเร็จ" sub="ปลดล็อก Achievement จากพฤติกรรมการเรียน"><div className="cards achievements">{a.map(x=>
+<div key={x[1]} className={"card achievement "+(x[3]?"unlocked":"")}><div>{x[0]}</div><h3>{x[1]}</h3><p>{x[2]}</p><span>{x[3]?"✓ ปลดล็อกแล้ว":"🔒 ยังไม่ปลดล็อก"}</span></div>)}</div></Page>}
 function SettingsPage({examDate,setExamDate,examTime,setExamTime,emergency,setEmergency,exportData,reminders,setReminders,notifyReady,enableNotifications}){
  const addReminder=()=>setReminders(rs=>[...rs,{id:Date.now(),time:"18:00",label:"เวลาอ่านหนังสือ",enabled:true,lastFired:""}]);
  return <Page title="ตั้งค่า" sub="ปรับระบบให้เหมาะกับการสอบของคุณ"><div className="card settings"><label>ชื่อผู้ใช้<input defaultValue="ธนัชพร"/></label><label>วันสอบ<input type="date" value={examDate} onChange={e=>setExamDate(e.target.value)}/></label><label>เวลาสอบ<input type="time" value={examTime} onChange={e=>setExamTime(e.target.value)}/></label><div className="notification-box"><div><b>🔔 การแจ้งเตือน</b><small>{notifyReady?"พร้อมแจ้งเตือนตามเวลาที่ตั้งไว้":"ต้องกดอนุญาตการแจ้งเตือนก่อน"}</small></div><button className="outline" onClick={enableNotifications}>{notifyReady?"ทดสอบแจ้งเตือน":"เปิดการแจ้งเตือน"}</button></div><div className="reminder-settings"><div className="title"><h2>เวลาที่เตือน</h2><button className="outline" onClick={addReminder}>+ เพิ่ม</button></div>{reminders.map(r=><div className="reminder-edit" key={r.id}><input type="time" value={r.time} onChange={e=>setReminders(rs=>rs.map(x=>x.id===r.id?{...x,time:e.target.value,lastFired:""}:x))}/><input value={r.label} onChange={e=>setReminders(rs=>rs.map(x=>x.id===r.id?{...x,label:e.target.value}:x))}/><input type="checkbox" checked={r.enabled} onChange={e=>setReminders(rs=>rs.map(x=>x.id===r.id?{...x,enabled:e.target.checked}:x))}/><button className="trash" onClick={()=>setReminders(rs=>rs.filter(x=>x.id!==r.id))}><Trash2 size={15}/></button></div>)}</div><label>Emergency Mode <input type="checkbox" checked={emergency} onChange={e=>setEmergency(e.target.checked)}/></label><div className="backup"><ShieldCheck/><div><b>ข้อมูลเก็บในเครื่องนี้</b><small>PassIt! ใช้ localStorage จึงใช้งานได้แม้ไม่ต่อฐานข้อมูล</small></div></div><button className="purple" onClick={exportData}><Download size={15}/>สำรองข้อมูล JSON</button></div></Page>
 }
 function AIModal({subjects,tasks,close}){return <div className="modal-bg"><div className="modal"><button className="x" onClick={close}><X/></button><AIBox subjects={subjects} tasks={tasks}/></div></div>}
-
