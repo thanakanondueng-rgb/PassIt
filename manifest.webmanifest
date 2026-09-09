@@ -1,9 +1,0 @@
-{
-  "name":"PassIt! Smart Study Planner",
-  "short_name":"PassIt!",
-  "start_url":"./",
-  "display":"standalone",
-  "theme_color":"#7650df",
-  "background_color":"#fbfaff",
-  "lang":"th"
-}
