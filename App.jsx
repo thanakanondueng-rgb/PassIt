@@ -80,6 +80,15 @@ export default function App(){
    if(!("serviceWorker" in navigator)) return;
    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(()=>{});
  },[]);
+ useEffect(() => {
+  if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission().then((permission) => {
+      if (permission === "granted") {
+        setNotifyReady(true);
+      }
+    });
+  }
+}, []);
 
  const enableNotifications=async()=>{
    if(!("Notification" in window)){
